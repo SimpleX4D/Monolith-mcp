@@ -542,18 +542,8 @@ namespace Content.Server.Atmos.EntitySystems
         {
             processed = 0; // Forge-Change
             var atmosphere = ent.Comp1;
-            if(!atmosphere.ProcessingPaused)
-            {
-                if (AtmosForceFullGridDebug)
-                {
-                    BeginRunList(atmosphere.CurrentRunTiles, ref atmosphere.CurrentRunTileIndex, atmosphere.ActiveTiles);
-                }
-                else
-                {
-                    BeginRunChunks(atmosphere, ent.Owner, ChunkRunType.Active);
-                    BeginRunTilesFromChunks(atmosphere, chunk => chunk.ActiveTiles);
-                }
-            }
+            if (!atmosphere.ProcessingPaused)
+                QueueRunTiles(atmosphere.CurrentRunTiles, atmosphere.ActiveTiles);
 
             var number = 0;
             while (atmosphere.CurrentRunTileIndex < atmosphere.CurrentRunTiles.Count) // Forge-Change
