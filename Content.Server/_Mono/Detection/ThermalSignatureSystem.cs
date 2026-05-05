@@ -2,7 +2,6 @@ using Content.Server.Power.Components;
 using Content.Server.Shuttles.Components;
 using Content.Shared._Mono.Detection;
 using Content.Shared._Mono.Ships;
-using Content.Shared.Power;
 using Content.Shared.Power.EntitySystems;
 using Content.Shared.Shuttles.Components;
 using Content.Shared.Shuttles.Systems;
@@ -53,9 +52,6 @@ public sealed class ThermalSignatureSystem : EntitySystem
         SubscribeLocalEvent<PassiveThermalSignatureComponent, GetThermalSignatureEvent>(OnPassiveGetSignature);
         SubscribeLocalEvent<ThermalSignatureComponent, ComponentStartup>(OnThermalStartup);
         SubscribeLocalEvent<ThermalSignatureComponent, ComponentShutdown>(OnThermalShutdown);
-        SubscribeLocalEvent<MachineThermalSignatureComponent, PowerChangedEvent>(OnMachinePowerChanged);
-        SubscribeLocalEvent<PowerSupplierComponent, PowerChangedEvent>(OnPowerSupplierChanged);
-        SubscribeLocalEvent<ThrusterComponent, PowerChangedEvent>(OnThrusterPowerChanged);
 
         SubscribeLocalEvent<ThermalSignatureComponent, GunShotEvent>(OnGunShot);
         SubscribeLocalEvent<PowerSupplierComponent, GetThermalSignatureEvent>(OnPowerGetSignature);
@@ -96,24 +92,6 @@ public sealed class ThermalSignatureSystem : EntitySystem
             ent.Comp.StoredHeat += gun.ShootThermalSignature;
             _activeSources.Add(ent.Owner);
         }
-    }
-
-    private void OnMachinePowerChanged(Entity<MachineThermalSignatureComponent> ent, ref PowerChangedEvent args)
-    {
-        if (_sigQuery.HasComp(ent))
-            _activeSources.Add(ent);
-    }
-
-    private void OnPowerSupplierChanged(Entity<PowerSupplierComponent> ent, ref PowerChangedEvent args)
-    {
-        if (_sigQuery.HasComp(ent))
-            _activeSources.Add(ent);
-    }
-
-    private void OnThrusterPowerChanged(Entity<ThrusterComponent> ent, ref PowerChangedEvent args)
-    {
-        if (_sigQuery.HasComp(ent))
-            _activeSources.Add(ent);
     }
 
     private void OnMachineGetSignature(Entity<MachineThermalSignatureComponent> ent, ref GetThermalSignatureEvent args)
