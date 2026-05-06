@@ -20835,3 +20835,24 @@ Entries:
   id: 2295
   time: '2026-05-06T20:50:59.0000000+00:00'
   url: https://github.com/Monolith-Station/Monolith/pull/3954
+- author: 77seven77seven
+  changes:
+    - type: Tweak
+      message: >-
+        All remaining instances of the Colonial Liaison removed and replaced
+        with "Overseer"
+    - type: Add
+      message: >-
+        There is now a deny sound when failing to FTL due to the proximity of
+        other ships.
+    - type: Fix
+      message: >-
+        MD Doctors no longer get the stamp of the Director of Care, and instead
+        get a doctor's stamp.
+    - type: Fix
+      message: >-
+        The Director of Care now gets the stamp of the Director of Care and not
+        the stamp of the Chief Medical Officer.
+  id: 2296
+  time: '2026-05-06T20:51:59.0000000+00:00'
+  url: https://github.com/Monolith-Station/Monolith/pull/3934
