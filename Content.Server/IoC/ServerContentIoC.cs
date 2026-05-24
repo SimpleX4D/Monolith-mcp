@@ -85,6 +85,7 @@ namespace Content.Server.IoC
             IoCManager.Register<CVarControlManager>();
             IoCManager.Register<MiniAuthManager>(); //Frontier
             IoCManager.Register<CompanyManager>(); // Mono
+            IoCManager.Register<MonoCoinsManager>(); // Mono
 
             IoCManager.Register<TTSManager>(); // Corvax-TTS
             IoCManager.Register<JoinQueueManager>(); // Forge-Change

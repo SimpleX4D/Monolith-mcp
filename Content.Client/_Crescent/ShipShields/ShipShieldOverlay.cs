@@ -13,6 +13,7 @@ using Robust.Shared.Physics.Systems;
 using Robust.Shared.Prototypes;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Robust.Client.GameObjects;
 
 namespace Content.Client._Crescent.ShipShields;
 
@@ -59,15 +60,23 @@ public sealed class ShipShieldOverlay : Overlay
             if (xform.MapID != args.MapId)
                 continue;
 
-            if (xform.GridUid is { } gridUid)
-                _drawnGrids.Add(gridUid);
-
             var fixture = _fixture.GetFixtureOrNull(uid, "shield", fixtures);
             if (fixture is not { Shape: ChainShape chain })
                 continue;
 
-            DrawShieldChain(handle, uid, chain, xform, _shieldTexture, visuals.ShieldColor, _verts);
-            _verts.Clear();
+            // Mono: No need to draw the shield locally if its out of range.
+            var transform = _physics.GetPhysicsTransform(uid, xform);
+            var worldBounds = new Box2();
+            foreach (var vertex in chain.Vertices)
+            {
+                var worldPos = VertexToWorldPos(vertex, transform);
+                worldBounds = worldBounds.ExtendToContain(worldPos);
+            }
+            if (!args.WorldAABB.Intersects(worldBounds))
+                continue;
+
+            DrawShield(handle, chain, transform, _shieldTexture, visuals.ShieldColor, _verts);
+            _verts.Clear(); // Clear for next shield - Mono
         }
 
         // Pass 2 — draw from replicated grid snapshot when the bubble is not in client PVS (scanner range).
@@ -103,60 +112,30 @@ public sealed class ShipShieldOverlay : Overlay
 
     private void DrawShieldChain(
         DrawingHandleWorld handle,
-        EntityUid uid,
         ChainShape chain,
-        TransformComponent xform,
+        Transform transform,
         Texture tex,
         Color color,
         List<DrawVertexUV2D> verts)
     {
-        var localPos = xform.LocalPosition;
-        var transform = _physics.GetPhysicsTransform(uid);
+        // The vertices of this fixture are defined relative to local position,
+        // so we'll have to add them to this and then use the matrix to put them back in world position.
+        // If "Transforms" ever get deprecated go ahead and check how DebugPHysicsSystem is drawing chains in this hellworld future
+
+        // Mono Update: Just use transform.Position for world position already for corners
 
         for (var i = 0; i < chain.Count; i++)
         {
             var next = (i + 1) % chain.Count;
 
-            var leftVertex = VertexToWorldPos(chain.Vertices[i], transform);
-            var rightVertex = VertexToWorldPos(chain.Vertices[next], transform);
-            var leftCorner = Corner(localPos, leftVertex, transform);
-            var rightCorner = Corner(localPos, rightVertex, transform);
+            // top right corner
+            var rightVertex = VertexToWorldPos(chain.Vertices[i], transform);
 
-            verts.Add(new DrawVertexUV2D(leftVertex, new Vector2(0, 1)));
-            verts.Add(new DrawVertexUV2D(rightVertex, new Vector2(1, 1)));
-            verts.Add(new DrawVertexUV2D(leftCorner, Vector2.Zero));
+            // bottom left corner
+            var leftCorner = Corner(leftVertex, transform);
 
-            verts.Add(new DrawVertexUV2D(rightVertex, new Vector2(1, 1)));
-            verts.Add(new DrawVertexUV2D(leftCorner, Vector2.Zero));
-            verts.Add(new DrawVertexUV2D(rightCorner, new Vector2(1, 0)));
-        }
-
-        handle.DrawPrimitives(DrawPrimitiveTopology.TriangleList, texture: tex, CollectionsMarshal.AsSpan(verts), color);
-    }
-
-    // Forge-Change: world draw from grid-local outline when bubble entity is not PVS-streamed.
-    private void DrawShieldOutline(
-        DrawingHandleWorld handle,
-        EntityUid gridUid,
-        MapGridComponent mapGrid,
-        TransformComponent gridXform,
-        Vector2[] outline,
-        Texture tex,
-        Color color,
-        List<DrawVertexUV2D> verts)
-    {
-        var transform = _physics.GetPhysicsTransform(gridUid);
-        var localPos = mapGrid.LocalAABB.Center;
-
-        for (var i = 0; i < outline.Length - 1; i++)
-        {
-            var leftLocal = outline[i];
-            var rightLocal = outline[i + 1];
-
-            var leftVertex = Vector2.Transform(leftLocal, gridXform.WorldMatrix);
-            var rightVertex = Vector2.Transform(rightLocal, gridXform.WorldMatrix);
-            var leftCorner = Corner(localPos, leftVertex, transform);
-            var rightCorner = Corner(localPos, rightVertex, transform);
+            // bottom right corner
+            var rightCorner = Corner(rightVertex, transform);
 
             verts.Add(new DrawVertexUV2D(leftVertex, new Vector2(0, 1)));
             verts.Add(new DrawVertexUV2D(rightVertex, new Vector2(1, 1)));
@@ -175,10 +154,9 @@ public sealed class ShipShieldOverlay : Overlay
         return Transform.Mul(transform, vertexPos);
     }
 
-    private static Vector2 Corner(Vector2 localPos, Vector2 vertexPos, Transform transform, float radius = 1.3f)
+    private static Vector2 Corner(Vector2 vertexPos, Transform transform, float radius = 1.3f)
     {
-        var localXform = Transform.Mul(transform, localPos);
-        var cornerPos = Vector2.Subtract(vertexPos, localXform);
+        var cornerPos = Vector2.Subtract(vertexPos, transform.Position);
         cornerPos.Normalize();
         cornerPos *= radius;
 

@@ -42,6 +42,7 @@ using Content.Client._NF.Emp.Overlays; // Frontier
 using Content.Client._Forge.DiscordAuth;
 using Content.Client._Forge.JoinQueue; // Forge-Change
 using Content.Client._Forge.Sponsor; // Forge-Change
+using Content.Client._Mono.Company; // Mono
 
 namespace Content.Client.Entry
 {
