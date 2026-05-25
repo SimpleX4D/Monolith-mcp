@@ -54,6 +54,7 @@ namespace Content.Server.NPC.Pathfinding
         [Dependency] private SharedMapSystem _maps = default!;
         [Dependency] private SharedPhysicsSystem _physics = default!;
         [Dependency] private SharedTransformSystem _transform = default!;
+        [Dependency] private IConfigurationManager _configManager = default!;
 
         private readonly Dictionary<ICommonSession, PathfindingDebugMode> _subscribedSessions = new();
 

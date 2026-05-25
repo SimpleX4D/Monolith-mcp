@@ -504,35 +504,9 @@ namespace Content.Server.Construction
                         return false;
                 }
 
-            if (!_actionBlocker.CanInteract(user, null)
-                || (senderSession != null && entWith == null)) // Goobstation
-            {
-                Cleanup();
-                return false;
-            }
-
-            var mapPos = _transformSystem.ToMapCoordinates(location);
-            var predicate = GetPredicate(constructionPrototype.CanBuildInImpassable, mapPos);
-
-            if (!_interactionSystem.InRangeUnobstructed(user, mapPos, predicate: predicate))
-            {
-                Cleanup();
-                return false;
-            }
-
-            if (pathFind == null)
-                throw new InvalidDataException($"Can't find path from starting node to target node in construction! Recipe: {prototypeName}");
-
-            var edge = startNode.GetEdge(pathFind[0].Name);
-
-            if(edge == null)
-                throw new InvalidDataException($"Can't find edge from starting node to the next node in pathfinding! Recipe: {prototypeName}");
-
-            if (senderSession != null) // Goobstation - don't check this for constructor machine
-            {
-                var valid = false;
-
-                if (entWith is not {Valid: true} holding) // Goobstation - don't check for constructor machine
+                // Goobstation
+                EntityUid? entWith = with == null ? null : GetEntity(with);
+                if (with != null && entWith != null)
                 {
                     // sus client can't use steel half the station away to build
                     var userPos = _transformSystem.GetMapCoordinates(user);

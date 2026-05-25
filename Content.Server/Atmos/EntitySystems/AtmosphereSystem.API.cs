@@ -82,10 +82,8 @@ public partial class AtmosphereSystem
 
     public void InvalidateTile(Entity<GridAtmosphereComponent?> entity, Vector2i tile)
     {
-        if (!_atmosQuery.Resolve(entity.Owner, ref entity.Comp, false))
-            return;
-
-        AddInvalidatedTile(entity.Comp, tile);
+        if (_atmosQuery.Resolve(entity.Owner, ref entity.Comp, false))
+            entity.Comp.InvalidatedCoords.Add(tile);
     }
 
     public GasMixture?[]? GetTileMixtures(
@@ -298,7 +296,6 @@ public partial class AtmosphereSystem
         if (!grid.Comp.AtmosDevices.Add(device))
             return false;
 
-        grid.Comp.CurrentRunAtmosDevicesDirty = true;
         device.Comp.JoinedGrid = grid;
         return true;
     }
@@ -313,7 +310,6 @@ public partial class AtmosphereSystem
         if (!grid.Comp.AtmosDevices.Remove(device))
             return false;
 
-        grid.Comp.CurrentRunAtmosDevicesDirty = true;
         device.Comp.JoinedGrid = null;
         return true;
     }

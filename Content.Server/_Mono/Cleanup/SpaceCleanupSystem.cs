@@ -22,8 +22,6 @@ public sealed partial class SpaceCleanupSystem : BaseCleanupSystem<PhysicsCompon
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IGameTiming _timing = default!;
-    private object _manifold = default!;
-    private MethodInfo _testOverlap = default!;
     [Dependency] private PricingSystem _pricing = default!;
     [Dependency] private SharedMapSystem _map = default!;
     [Dependency] private SharedPhysicsSystem _physics = default!;

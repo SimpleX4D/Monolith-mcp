@@ -22,6 +22,7 @@ public sealed partial class GridCleanupSystem : BaseCleanupSystem<MapGridCompone
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private PricingSystem _pricing = default!;
     [Dependency] private SharedMapSystem _map = default!;
+    [Dependency] private IGameTiming _timing = default!;
 
     private float _maxDistance;
     private float _maxValue;

@@ -33,6 +33,8 @@ public sealed partial class HTNSystem : EntitySystem
     // Frontier
     [Dependency] private WorldControllerSystem _world = default!;
     [Dependency] private TransformSystem _transform = default!;
+    [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private IRobustRandom _random = default!;
     private EntityQuery<WorldControllerComponent> _mapQuery;
     private EntityQuery<LoadedChunkComponent> _loadedQuery;
     // Frontier

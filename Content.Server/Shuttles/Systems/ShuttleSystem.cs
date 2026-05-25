@@ -5,6 +5,7 @@ using Content.Server.Buckle.Systems;
 using Content.Server.Doors.Systems;
 using Content.Server.GameTicking;
 using Content.Server.Parallax;
+using Content.Server.Popups;
 using Content.Server.Procedural;
 using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Events;
@@ -13,8 +14,9 @@ using Content.Server.Stunnable;
 using Content.Shared.Buckle.Components;
 using Content.Shared.Damage;
 using Content.Shared.GameTicking;
-using Content.Shared.Light.Components;
 using Content.Shared.Inventory;
+using Content.Shared.Light.Components;
+using Content.Shared.Maps;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Movement.Events;
 using Content.Shared.Popups;
@@ -36,7 +38,6 @@ using Robust.Shared.Physics.Systems;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
-using Content.Shared.Maps;
 
 namespace Content.Server.Shuttles.Systems;
 
@@ -75,6 +76,7 @@ public sealed partial class ShuttleSystem : SharedShuttleSystem
     [Dependency] private UserInterfaceSystem _uiSystem = default!;
     [Dependency] private GameTicker _ticker = default!; //frontier edit to get the main map in FTL
     [Dependency] private TurfSystem _turf = default!;
+    [Dependency] private PopupSystem _popup = default!;
 
     private EntityQuery<BuckleComponent> _buckleQuery;
     private EntityQuery<MapGridComponent> _gridQuery;

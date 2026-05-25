@@ -278,9 +278,6 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
         if (!_enabled)
             return;
 
-        LastFramePathRequests = 0;
-        LastFramePathCacheHits = 0;
-
         // Not every mob has the modifier component so do it as a separate query.
         var npcs = new (EntityUid, NPCSteeringComponent, InputMoverComponent, TransformComponent)[Count<ActiveNPCComponent>()];
 
@@ -307,7 +304,6 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
             var (uid, steering, mover, xform) = npcs[i];
             Steer(uid, steering, mover, xform, frameTime, curTime);
         });
-        LastFrameSteeringUpdates = index;
 
         ActiveSteeringGauge.Set(_activeSteeringCount);
 
@@ -508,7 +504,6 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
         steering.PathfindToken = new CancellationTokenSource();
         steering.ForceRepath = false;
         ScheduleNextRepath(steering);
-        LastFramePathRequests++;
 
         var flags = _pathfindingSystem.GetFlags(uid);
 

@@ -42,56 +42,6 @@ namespace Content.Server.Power.EntitySystems
             SubscribeLocalEvent<NetworkBatteryPostSync>(PostSync);
         }
 
-        private void OnBatteryComponentInit(EntityUid uid, BatteryComponent component, ComponentInit args)
-        {
-            UpdateNetworkBatteryTracking(uid);
-            _networkBatteryRegistryDirty = true;
-        }
-
-        private void OnBatteryComponentShutdown(EntityUid uid, BatteryComponent component, ComponentShutdown args)
-        {
-            _networkBatteries.Remove(uid);
-            _networkBatteryRegistryDirty = true;
-        }
-
-        private void UpdateNetworkBatteryTracking(EntityUid uid)
-        {
-            if (HasComp<PowerNetworkBatteryComponent>(uid) && HasComp<BatteryComponent>(uid))
-            {
-                _networkBatteries.Add(uid);
-                return;
-            }
-
-            _networkBatteries.Remove(uid);
-        }
-
-        private void CleanupStaleNetworkBatteries()
-        {
-            if (_staleNetworkBatteries.Count == 0)
-                return;
-
-            foreach (var uid in _staleNetworkBatteries)
-            {
-                _networkBatteries.Remove(uid);
-            }
-
-            _staleNetworkBatteries.Clear();
-        }
-
-        private void RebuildNetworkBatteryRegistry()
-        {
-            _networkBatteries.Clear();
-
-            var enumerator = AllEntityQuery<PowerNetworkBatteryComponent, BatteryComponent>();
-            while (enumerator.MoveNext(out var uid, out _, out _))
-            {
-                _networkBatteries.Add(uid);
-            }
-
-            _networkBatteryRegistryDirty = false;
-            _networkBatteryRegistryAccumulator = 0f;
-        }
-
         private void OnNetBatteryRejuvenate(EntityUid uid, PowerNetworkBatteryComponent component, RejuvenateEvent args)
         {
             component.NetworkBattery.CurrentStorage = component.NetworkBattery.Capacity;
@@ -125,44 +75,24 @@ namespace Content.Server.Power.EntitySystems
 
         private void PreSync(NetworkBatteryPreSync ev)
         {
-            _networkBatteryRegistryAccumulator += 0.5f;
-            if (_networkBatteryRegistryDirty || _networkBatteryRegistryAccumulator >= NetworkBatteryRegistryRebuildInterval)
-            {
-                RebuildNetworkBatteryRegistry();
-            }
-
             // Ignoring entity pausing. If the entity was paused, neither component's data should have been changed.
-            foreach (var uid in _networkBatteries)
+            var enumerator = AllEntityQuery<PowerNetworkBatteryComponent, BatteryComponent>();
+            while (enumerator.MoveNext(out var netBat, out var bat))
             {
-                if (!TryComp<PowerNetworkBatteryComponent>(uid, out var netBat) || !TryComp<BatteryComponent>(uid, out var bat))
-                {
-                    _staleNetworkBatteries.Add(uid);
-                    continue;
-                }
-
                 DebugTools.Assert(bat.CurrentCharge <= bat.MaxCharge && bat.CurrentCharge >= 0);
                 netBat.NetworkBattery.Capacity = bat.MaxCharge;
                 netBat.NetworkBattery.CurrentStorage = bat.CurrentCharge;
             }
-
-            CleanupStaleNetworkBatteries();
         }
 
         private void PostSync(NetworkBatteryPostSync ev)
         {
             // Ignoring entity pausing. If the entity was paused, neither component's data should have been changed.
-            foreach (var uid in _networkBatteries)
+            var enumerator = AllEntityQuery<PowerNetworkBatteryComponent, BatteryComponent>();
+            while (enumerator.MoveNext(out var uid, out var netBat, out var bat))
             {
-                if (!TryComp<PowerNetworkBatteryComponent>(uid, out var netBat) || !TryComp<BatteryComponent>(uid, out var bat))
-                {
-                    _staleNetworkBatteries.Add(uid);
-                    continue;
-                }
-
                 SetCharge(uid, netBat.NetworkBattery.CurrentStorage, bat);
             }
-
-            CleanupStaleNetworkBatteries();
         }
 
         public override void Update(float frameTime)

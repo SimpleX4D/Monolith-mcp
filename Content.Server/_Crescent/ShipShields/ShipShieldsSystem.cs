@@ -16,6 +16,7 @@ using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Events;
 using Robust.Shared.Physics.Systems;
 using Robust.Shared.Audio.Systems;
+using Robust.Server.GameStates;
 using Robust.Shared.Timing; // Forge-Change
 using System.Numerics;
 
@@ -32,9 +33,9 @@ public sealed partial class ShipShieldsSystem : EntitySystem
     [Dependency] private FixtureSystem _fixtureSystem = default!;
     [Dependency] private PhysicsSystem _physicsSystem = default!;
     [Dependency] private PvsOverrideSystem _pvsSys = default!;
-    [Dependency] private readonly StationSystem _station = default!; // Forge-Change
-    [Dependency] private readonly SharedAudioSystem _audio = default!; // Forge-Change
-    [Dependency] private readonly IGameTiming _timing = default!; // Forge-Change
+    [Dependency] private StationSystem _station = default!; // Forge-Change
+    [Dependency] private SharedAudioSystem _audio = default!; // Forge-Change
+    [Dependency] private IGameTiming _timing = default!; // Forge-Change
 
     private EntityQuery<ProjectileComponent> _projectileQuery;
     private EntityQuery<ShipWeaponProjectileComponent> _shipWeaponProjectileQuery;
@@ -109,7 +110,6 @@ public sealed partial class ShipShieldsSystem : EntitySystem
             if (parent == null)
                 continue;
 
-            var filter = _station.GetInOwningStation(uid);
 
             if (emitter.Damage > emitter.DamageLimit)
             {
@@ -128,14 +128,12 @@ public sealed partial class ShipShieldsSystem : EntitySystem
                     emitter.Shield = shield;
                     emitter.Shielded = parent.Value;
                 }
-                _audio.PlayGlobal(emitter.PowerUpSound, filter, true, emitter.PowerUpSound.Params);
             }
             else if ((emitter.Recharging || emitter.OverloadAccumulator > 0) && emitter.Shield is not null)
             {
                 UnshieldEntity(parent.Value);
                 emitter.Shield = null;
                 emitter.Shielded = null;
-                _audio.PlayGlobal(emitter.PowerDownSound, filter, true, emitter.PowerUpSound.Params);
             }
 
             // Forge-Change-Start

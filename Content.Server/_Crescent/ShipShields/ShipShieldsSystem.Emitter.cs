@@ -10,15 +10,16 @@ using Content.Shared.Examine;
 using Content.Server.Explosion.Components;
 using Content.Shared.Explosion.Components;
 using Robust.Shared.Prototypes;
+using Content.Server.Station.Systems;
+using Robust.Shared.Audio.Systems;
 
 namespace Content.Server._Crescent.ShipShields;
 
 public partial class ShipShieldsSystem
 {
     private const float MAX_EMP_DAMAGE = 10000f;
+    private const float ShieldAbsorbEpsilon = 0.001f;
     [Dependency] private TriggerSystem _trigger = default!;
-    [Dependency] private StationSystem _station = default!;
-    [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private IPrototypeManager _prototypeManager = default!;
     public void InitializeEmitters()
     {

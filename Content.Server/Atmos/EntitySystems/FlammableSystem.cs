@@ -30,7 +30,6 @@ using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Events;
 using Robust.Shared.Physics.Systems;
 using Robust.Shared.Random;
-using Robust.Shared.Timing;
 using Content.Server._NF.Atmos.Components; // Frontier
 using Robust.Shared.Timing;
 

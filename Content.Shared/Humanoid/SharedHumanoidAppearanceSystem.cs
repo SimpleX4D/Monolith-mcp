@@ -25,6 +25,7 @@ using System.Linq;
 using System.Numerics;
 using YamlDotNet.RepresentationModel;
 using Content.Shared._EE.Contractors.Prototypes; // Forge-change: _EE nationality
+using Content.Shared._Shitmed.Humanoid.Events; // Shitmed Change
 using Content.Shared.Sprite;
 
 namespace Content.Shared.Humanoid;

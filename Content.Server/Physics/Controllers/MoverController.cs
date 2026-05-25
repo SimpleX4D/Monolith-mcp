@@ -555,6 +555,7 @@ public sealed partial class MoverController : SharedMoverController
             shuttle.AccelerationMultiplier = accelMul;
 
             var shuttleNorthAngle = _transform.GetWorldRotation(uid);
+            var negShuttleNorthAngle = -shuttleNorthAngle; // Forge-Change: cache negated angle, reused below
 
             var xform = Transform(uid);
 
@@ -719,7 +720,7 @@ public sealed partial class MoverController : SharedMoverController
     {
         // We just mark off their movement and the shuttle itself does its own movement
         var activePilotQuery = EntityQueryEnumerator<PilotComponent, InputMoverComponent>();
-        while (activePilotQuery.MoveNext(out var uid, out var pilot, out var mover))
+        while (activePilotQuery.MoveNext(out var uid, out var pilot, out _))
         {
             var consoleEnt = pilot.Console;
 
@@ -737,26 +738,7 @@ public sealed partial class MoverController : SharedMoverController
                 !shuttleComponent.Enabled)
                 continue;
 
-            if (!newPilots.TryGetValue(gridId.Value, out var pilots))
-            {
-                pilots = (shuttleComponent, new List<(EntityUid, PilotComponent, InputMoverComponent, TransformComponent)>());
-                newPilots[gridId.Value] = pilots;
-            }
-
-            pilots.Item2.Add((uid, pilot, mover, xform));
-        }
-
-        _shuttlePilots = newPilots;
-
-
-        // Collate all of the linear / angular velocites for a shuttle
-        // then do the movement input once for it.
-        foreach (var (shuttleUid, (shuttle, pilots)) in _shuttlePilots)
-        {
-            foreach (var (pilotUid, _, _, _) in pilots)
-            {
-                AddPilot(shuttleUid, pilotUid);
-            }
+            AddPilot(gridId.Value, uid);
         }
     }
     // Forge-Change-End

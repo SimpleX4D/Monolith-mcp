@@ -13,10 +13,10 @@ namespace Content.Server._Mono.Cleanup;
 /// </summary>
 public sealed partial class CleanupHelperSystem : EntitySystem
 {
-    [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private IMapManager _mapMan = default!;
     [Dependency] private SharedMindSystem _mind = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private IGameTiming _timing = default!;
 
     private List<Entity<MapGridComponent>> _gridsFound = new();
     private HashSet<Entity<MindContainerComponent>> _mindsFound = new();

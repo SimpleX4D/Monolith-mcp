@@ -80,6 +80,16 @@ public abstract partial class SharedMoverController : VirtualController
     /// </summary>
     public Dictionary<EntityUid, bool> UsedMobMovement = new();
 
+    // Forge-Change-Start
+    // Per-tick cache for IsWeightless. Saves a second call from OnTileFriction
+    // for every mover that HandleMobMovement already evaluated.
+    private readonly Dictionary<EntityUid, bool> _weightlessCache = new();
+
+    // Per-tick cache for tile-definition lookups, keyed by (gridUid, tile coords).
+    // Many movers stand on the same tile; caching avoids repeated chunk + tile resolves.
+    private readonly Dictionary<(EntityUid, Vector2i), ContentTileDefinition?> _tileDefCache = new();
+    // Forge-Change-End
+
     private readonly HashSet<EntityUid> _aroundColliderSet = [];
 
     public override void Initialize()
@@ -136,6 +146,33 @@ public abstract partial class SharedMoverController : VirtualController
         _tileDefCache.Clear();
         // Forge-Change-End
     }
+
+    // Forge-Change-Start: per-tick caches to avoid repeated heavy lookups across HandleMobMovement / OnTileFriction / footstep paths
+    private bool GetWeightlessCached(EntityUid uid, PhysicsComponent physics, TransformComponent xform)
+    {
+        if (_weightlessCache.TryGetValue(uid, out var cached))
+            return cached;
+
+        var weightless = _gravity.IsWeightless(uid, physics, xform);
+        _weightlessCache[uid] = weightless;
+        return weightless;
+    }
+
+    private ContentTileDefinition? GetTileDefCached(EntityUid gridUid, MapGridComponent gridComp, EntityCoordinates coords)
+    {
+        var tileIndices = _mapSystem.LocalToTile(gridUid, gridComp, coords);
+        var key = (gridUid, tileIndices);
+        if (_tileDefCache.TryGetValue(key, out var cached))
+            return cached;
+
+        ContentTileDefinition? def = null;
+        if (_mapSystem.TryGetTileRef(gridUid, gridComp, coords, out var tile))
+            def = (ContentTileDefinition)_tileDefinitionManager[tile.Tile.TypeId];
+
+        _tileDefCache[key] = def;
+        return def;
+    }
+    // Forge-Change-End
 
     /// <summary>
     ///     Movement while considering actionblockers, weightlessness, etc.
@@ -281,10 +318,11 @@ public abstract partial class SharedMoverController : VirtualController
         }
         else
         {
-            if (MapGridQuery.TryComp(xform.GridUid, out var gridComp)
-                && _mapSystem.TryGetTileRef(xform.GridUid.Value, gridComp, xform.Coordinates, out var tile)
-                && physicsComponent.BodyStatus == BodyStatus.OnGround)
-                tileDef = (ContentTileDefinition)_tileDefinitionManager[tile.Tile.TypeId];
+            // Forge-Change-Start: use per-tick cached tile def lookup (multiple movers on same tile share result)
+            if (physicsComponent.BodyStatus == BodyStatus.OnGround
+                && MapGridQuery.TryComp(xform.GridUid, out var gridComp))
+                tileDef = GetTileDefCached(xform.GridUid.Value, gridComp, xform.Coordinates);
+            // Forge-Change-End
 
             var walkSpeed = moveSpeedComponent?.CurrentWalkSpeed ?? MovementSpeedModifierComponent.DefaultBaseWalkSpeed;
             var sprintSpeed = moveSpeedComponent?.CurrentSprintSpeed ?? MovementSpeedModifierComponent.DefaultBaseSprintSpeed;
@@ -351,8 +389,10 @@ public abstract partial class SharedMoverController : VirtualController
                 _transform.SetLocalRotation(uid, xform.LocalRotation + wishDir.ToWorldAngle() - worldRot, xform);
             }
 
-            if (!weightless && MobMoverQuery.TryGetComponent(uid, out var mobMover) &&
-                TryGetSound(weightless, uid, mover, mobMover, xform, out var sound, tileDef: tileDef))
+            if (!weightless
+                && MobMoverQuery.TryGetComponent(uid, out var mobMover)
+                && TryGetSound(weightless, uid, mover, mobMover, xform, out var sound, tileDef: tileDef)
+                && sound != null)
             {
                 var soundModifier = mover.Sprinting ? InputMoverComponent.SprintingSoundModifier
                     : InputMoverComponent.WalkingSoundModifier;
@@ -670,11 +710,11 @@ public abstract partial class SharedMoverController : VirtualController
 
     private void OnTileFriction(Entity<MovementSpeedModifierComponent> ent, ref TileFrictionEvent args)
     {
-        if (!PhysicsQuery.TryComp(ent, out var physicsComponent))
+        if (!PhysicsQuery.TryComp(ent, out var physicsComponent) || !XformQuery.TryComp(ent, out var xform))
             return;
 
         // TODO: Make IsWeightless event based!!!
-        if (physicsComponent.BodyStatus != BodyStatus.OnGround || _gravity.IsWeightless(ent, physicsComponent, Transform(ent)))
+        if (physicsComponent.BodyStatus != BodyStatus.OnGround || GetWeightlessCached(ent, physicsComponent, xform))
             args.Modifier *= ent.Comp.BaseWeightlessFriction;
         else
             args.Modifier *= ent.Comp.BaseFriction;

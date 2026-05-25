@@ -1,9 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Content.Shared.CCVar;
-using System.Text.RegularExpressions;
 using Robust.Shared.Configuration;
-
 namespace Content.Server.Chat.Managers;
 
 /// <summary>
@@ -11,7 +9,7 @@ namespace Content.Server.Chat.Managers;
 ///     It currently ony removes the shorthands for emotes (like "lol" or "^-^") from a chat message and returns the last
 ///     emote in their message
 /// </summary>
-public sealed partial class ChatSanitizationManager : IChatSanitizationManager
+public sealed class ChatSanitizationManager : IChatSanitizationManager
 {
     private static readonly Dictionary<string, string> ShorthandToEmote = new()
     {
@@ -164,8 +162,21 @@ public sealed partial class ChatSanitizationManager : IChatSanitizationManager
         // -1 is just a canary for nothing found yet
         var lastEmoteIndex = -1;
 
-        foreach (var (r, emoteKey) in ShorthandToEmote)
+        foreach (var (shorthand, emoteKey) in ShorthandToEmote)
         {
+            // We have to escape it because shorthands like ":)" or "-_-" would break the regex otherwise.
+            var escaped = Regex.Escape(shorthand);
+
+            // So there are 2 cases:
+            // - If there is whitespace before it and after it is either punctuation, whitespace, or the end of the line
+            //   Delete the word and the whitespace before
+            // - If it is at the start of the string and is followed by punctuation, whitespace, or the end of the line
+            //   Delete the word and the punctuation if it exists.
+            var pattern =
+                $@"\s{escaped}(?=\p{{P}}|\s|$)|^{escaped}(?:\p{{P}}|(?=\s|$))";
+
+            var r = new Regex(pattern, RegexOptions.RightToLeft | RegexOptions.IgnoreCase);
+
             // We're using sanitized as the original message until the end so that we can make sure the indices of
             // the emotes are accurate.
             var lastMatch = r.Match(sanitized);
@@ -184,22 +195,5 @@ public sealed partial class ChatSanitizationManager : IChatSanitizationManager
 
         sanitized = message.Trim();
         return emote is not null;
-    }
-
-    private static (Regex regex, string emoteKey) Entry(string shorthand, string emoteKey)
-    {
-        // We have to escape it because shorthands like ":)" or "-_-" would break the regex otherwise.
-        var escaped = Regex.Escape(shorthand);
-
-        // So there are 2 cases:
-        // - If there is whitespace before it and after it is either punctuation, whitespace, or the end of the line
-        //   Delete the word and the whitespace before
-        // - If it is at the start of the string and is followed by punctuation, whitespace, or the end of the line
-        //   Delete the word and the punctuation if it exists.
-        var pattern = new Regex(
-            $@"\s{escaped}(?=\p{{P}}|\s|$)|^{escaped}(?:\p{{P}}|(?=\s|$))",
-            RegexOptions.RightToLeft | RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-        return (pattern, emoteKey);
     }
 }

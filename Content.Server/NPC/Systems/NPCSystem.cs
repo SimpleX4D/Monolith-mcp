@@ -32,9 +32,9 @@ namespace Content.Server.NPC.Systems
         [Dependency] private IConfigurationManager _configurationManager = default!;
         [Dependency] private HTNSystem _htn = default!;
         [Dependency] private MobStateSystem _mobState = default!;
-        [Dependency] private NPCSteeringSystem _steering = default!;
-        [Dependency] private SharedTransformSystem _transform = default!;
         [Dependency] private IPlayerManager _playerManager = default!;
+        [Dependency] private IGameTiming _timing = default!;
+
 
         /// <summary>
         /// Whether any NPCs are allowed to run at all.

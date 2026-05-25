@@ -29,7 +29,6 @@ public abstract partial class SharedJetpackSystem : EntitySystem
     [Dependency] private IConfigurationManager _config = default!; // EE
     [Dependency] private SharedGravitySystem _gravity = default!; // Mono
     [Dependency] private InventorySystem _inventory = default!;
-    [Dependency] private SharedGravitySystem _gravity = default!;
     [Dependency] private IGameTiming _timing = default!;
 
     private const float BaseCombatControlPenalty = 0.15f;
