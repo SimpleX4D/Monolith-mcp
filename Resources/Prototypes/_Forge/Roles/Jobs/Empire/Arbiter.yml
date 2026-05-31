@@ -20,6 +20,7 @@
   alwaysUseSpawner: true
   icon: JobIconEmpireArbiter
   assignedCompany: Imperial
+  assignedNationality: Imperial
   supervisors: job-supervisors-praefect
   weight: 40
   displayWeight: 40

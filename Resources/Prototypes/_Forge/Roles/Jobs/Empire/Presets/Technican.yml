@@ -16,6 +16,7 @@
   displayWeight: 38
   canBeAntag: false
   assignedCompany: Imperial
+  assignedNationality: Imperial
   accessGroups:
   - GeneralEmpireAccess
   special:

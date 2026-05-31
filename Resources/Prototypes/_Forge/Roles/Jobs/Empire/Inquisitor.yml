@@ -27,6 +27,7 @@
   alwaysUseSpawner: true
   icon: JobIconEmpireInquisitor
   assignedCompany: Imperial
+  assignedNationality: Imperial
   supervisors: job-supervisors-inquisitor-grand
   weight: 30
   displayWeight: 30

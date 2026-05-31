@@ -6,6 +6,7 @@ using Content.Shared.Roles;
 using Content.Shared.StationRecords;
 using Robust.Shared.Enums;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Localization;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 
@@ -48,17 +49,65 @@ public static class JobPresetRequirementHelper
         IPrototypeManager protoManager,
         IReadOnlyDictionary<string, TimeSpan> playTimes,
         [NotNullWhen(false)] out FormattedMessage? reason,
-        bool enforcePlaytimeRequirements = false)
+        bool enforcePlaytimeRequirements = false,
+        bool ignoreDemographicRequirements = false)
     {
-        return JobRequirements.TryRequirementsMet(
-            job,
-            playTimes,
-            out reason,
-            entManager,
-            protoManager,
-            profile,
-            enforcePlaytimeRequirements: enforcePlaytimeRequirements);
+        var sys = entManager.System<SharedRoleSystem>();
+        var requirements = sys.GetJobRequirement(job);
+        reason = null;
+        if (requirements == null)
+            return true;
+
+        var success = true;
+        foreach (var requirement in requirements)
+        {
+            if (!enforcePlaytimeRequirements && requirement.IsPlaytimeRequirement)
+                continue;
+
+            if (ignoreDemographicRequirements && IsDemographicRequirement(requirement))
+                continue;
+
+            if (!requirement.Check(entManager, protoManager, profile, playTimes, out reason))
+            {
+                success = false;
+                break;
+            }
+        }
+
+        if (success)
+            return true;
+
+        var altRequirementsSets = job.AlternateRequirementSets ?? new();
+        foreach (var requirementSet in altRequirementsSets.Values)
+        {
+            success = true;
+            foreach (var requirement in requirementSet)
+            {
+                if (!enforcePlaytimeRequirements && requirement.IsPlaytimeRequirement)
+                    continue;
+
+                if (ignoreDemographicRequirements && IsDemographicRequirement(requirement))
+                    continue;
+
+                if (!requirement.Check(entManager, protoManager, profile, playTimes, out _))
+                {
+                    success = false;
+                    break;
+                }
+            }
+
+            if (success)
+                return true;
+        }
+
+        if (reason == null)
+            reason = FormattedMessage.FromMarkupPermissive(Loc.GetString("role-timer-no-reason-given"));
+
+        return false;
     }
+
+    private static bool IsDemographicRequirement(JobRequirement requirement) =>
+        requirement is AgeRequirement or SpeciesRequirement or SexRequirement;
 
     public static string FormatReason(FormattedMessage reason)
     {

@@ -28,6 +28,7 @@
   startingGear: ConsulGear
   alwaysUseSpawner: true
   assignedCompany: Imperial
+  assignedNationality: Imperial
   icon: JobIconEmpireConsul
   supervisors: job-supervisors-nobody
   weight: 30

@@ -31,6 +31,7 @@
   #     time: 43200 # 12 hours
   startingGear: TessarianGear
   assignedCompany: Imperial
+  assignedNationality: Imperial
   weight: 20
   displayWeight: 20
   canBeAntag: false

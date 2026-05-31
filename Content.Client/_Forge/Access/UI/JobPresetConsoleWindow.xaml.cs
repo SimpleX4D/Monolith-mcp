@@ -149,15 +149,19 @@ public sealed partial class JobPresetConsoleWindow : DefaultWindow
         HashSet<ProtoId<AccessLevelPrototype>> currentTags,
         HashSet<ProtoId<AccessLevelPrototype>> allowedTags)
     {
-        if (!state.HasTargetDemographics)
+        if (!state.HasTargetDemographics && !state.IgnoreDemographicRequirements)
         {
             return Loc.GetString("job-preset-id-card-console-window-missing-demographics");
         }
 
-        var profile = JobPresetRequirementHelper.ProfileFromAppearance(
-            state.TargetSpecies,
-            state.TargetAge,
-            state.TargetSex);
+        HumanoidCharacterProfile? profile = null;
+        if (state.HasTargetDemographics)
+        {
+            profile = JobPresetRequirementHelper.ProfileFromAppearance(
+                state.TargetSpecies,
+                state.TargetAge,
+                state.TargetSex);
+        }
 
         if (!JobPresetRequirementHelper.TryCheckJobRequirements(
                 job,
@@ -166,7 +170,8 @@ public sealed partial class JobPresetConsoleWindow : DefaultWindow
                 _prototypeManager,
                 EmptyPlaytimes,
                 out var requirementReason,
-                enforcePlaytimeRequirements: false))
+                enforcePlaytimeRequirements: false,
+                ignoreDemographicRequirements: state.IgnoreDemographicRequirements))
         {
             return JobPresetRequirementHelper.FormatReason(requirementReason);
         }
@@ -174,8 +179,9 @@ public sealed partial class JobPresetConsoleWindow : DefaultWindow
         if (!TryResolveJobAccess(jobId, out var presetTags))
             return Loc.GetString("job-preset-id-card-console-window-invalid-preset");
 
-        var requiredAccess = presetTags
-            .Union(currentTags);
+        var requiredAccess = state.RequirePresetAccessOnly
+            ? presetTags
+            : presetTags.Union(currentTags);
 
         if (requiredAccess.All(allowedTags.Contains))
             return null;
@@ -226,6 +232,9 @@ public sealed partial class JobPresetConsoleWindow : DefaultWindow
 
         if (!state.IsPrivilegedIdAuthorized)
             return Loc.GetString("job-preset-id-card-console-window-hint-unauthorized");
+
+        if (state.RequirePresetAccessOnly)
+            return Loc.GetString("job-preset-id-card-console-window-hint-authorized-preset-only");
 
         return Loc.GetString("job-preset-id-card-console-window-hint-authorized");
     }

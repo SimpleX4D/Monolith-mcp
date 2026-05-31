@@ -41,6 +41,8 @@ public sealed class JobPresetIdCardConsoleBoundUserInterfaceState : BoundUserInt
     public readonly List<ProtoId<AccessLevelPrototype>>? AllowedModifyAccessList;
     public readonly ProtoId<JobPrototype> TargetIdJobPrototype;
     public readonly bool HasTargetDemographics;
+    public readonly bool IgnoreDemographicRequirements;
+    public readonly bool RequirePresetAccessOnly;
     public readonly int TargetAge;
     public readonly ProtoId<SpeciesPrototype> TargetSpecies;
     public readonly Sex TargetSex;
@@ -54,6 +56,8 @@ public sealed class JobPresetIdCardConsoleBoundUserInterfaceState : BoundUserInt
         ProtoId<JobPrototype> targetIdJobPrototype,
         string privilegedIdName,
         string targetIdName,
+        bool ignoreDemographicRequirements = false,
+        bool requirePresetAccessOnly = false,
         bool hasTargetDemographics = false,
         int targetAge = 0,
         ProtoId<SpeciesPrototype> targetSpecies = default,
@@ -67,6 +71,8 @@ public sealed class JobPresetIdCardConsoleBoundUserInterfaceState : BoundUserInt
         TargetIdJobPrototype = targetIdJobPrototype;
         PrivilegedIdName = privilegedIdName;
         TargetIdName = targetIdName;
+        IgnoreDemographicRequirements = ignoreDemographicRequirements;
+        RequirePresetAccessOnly = requirePresetAccessOnly;
         HasTargetDemographics = hasTargetDemographics;
         TargetAge = targetAge;
         TargetSpecies = targetSpecies;

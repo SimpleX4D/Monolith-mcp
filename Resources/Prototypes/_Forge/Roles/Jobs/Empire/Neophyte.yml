@@ -18,6 +18,7 @@
   canBeAntag: false
   setPreference: true
   assignedCompany: Imperial
+  assignedNationality: Imperial
   accessGroups:
   - GeneralEmpireAccess
   special:
