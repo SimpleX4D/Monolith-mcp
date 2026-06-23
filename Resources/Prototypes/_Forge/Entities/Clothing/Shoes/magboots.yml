@@ -182,3 +182,21 @@
   - type: ClothingSpeedModifier
     walkModifier: 1.0
     sprintModifier: 1.0
+
+- type: entity
+  parent: [ClothingShoesBootsMag, ClothingShoesBootsCombat, BaseFactionGearOtherFactionT1]
+  id: ClothingShoesBootsMagUllman
+  name: ullman magboots
+  description: Ullman security magnetic boots, often used during extravehicular activity to ensure the user remains safely attached to the vehicle.
+  suffix: UI
+  components:
+  - type: Sprite
+    sprite: Forge/Clothing/Shoes/Boots/ui_magboots.rsi
+    state: icon
+  - type: Clothing
+    sprite: Forge/Clothing/Shoes/Boots/ui_magboots.rsi
+  - type: Magboots
+    magbootsAlert: MagbootsSecurity
+  - type: ClothingSpeedModifier
+    walkModifier: 1.0
+    sprintModifier: 1.0

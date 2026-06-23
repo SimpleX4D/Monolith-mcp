@@ -72,6 +72,20 @@
 
 - type: entity
   parent: ClothingMaskGasSecurity
+  id: ClothingMaskGasUllman
+  name: ullman gas mask
+  suffix: UI
+  description: A standard issue Ullman gas mask.
+  components:
+  - type: Item
+    size: Tiny
+  - type: Sprite
+    sprite: Forge/Clothing/Mask/ui_gasmask.rsi
+  - type: Clothing
+    sprite: Forge/Clothing/Mask/ui_gasmask.rsi
+    
+- type: entity
+  parent: ClothingMaskGasSecurity
   id: ClothingMaskGasViperGroup
   name: viper group gas mask
   description: A standard issue Viper Group gas mask.
