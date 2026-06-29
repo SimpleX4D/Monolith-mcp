@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "saiga-agent": {
+      "command": "python",
+      "args": [
+        "C:\\Users\\SimpleX\\Desktop\\serverass\\server\\Monolith\\agent-runner\\mcp_server.py",
+        "--ss14-url",
+        "http://127.0.0.1:1212",
+        "--ss14-token",
+        "devsecret",
+        "--agent",
+        "4107"
+      ],
+      "env": {
+        "PYTHONIOENCODING": "utf-8"
+      }
+    }
+  }
+}
