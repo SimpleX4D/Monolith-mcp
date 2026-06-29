@@ -4,6 +4,7 @@ using Content.Server._Forge.Sponsor; // Forge-Change
 using Content.Server._Forge.TTS; // Forge-Change
 using Content.Server._Mono.Company;
 using Content.Server._Mono.MonoCoins; // Mono
+using Content.Server._Mono.Saiga; // Mono — local LLM (Ollama/Saiga)
 using Content.Server._NF.Auth;
 using Content.Server.Administration;
 using Content.Server.Administration.Logs;
@@ -87,6 +88,7 @@ namespace Content.Server.IoC
             IoCManager.Register<MiniAuthManager>(); //Frontier
             IoCManager.Register<CompanyManager>(); // Mono
             IoCManager.Register<MonoCoinsManager>(); // Mono — Forge-Change: registered for console commands, gameplay disabled elsewhere
+            IoCManager.Register<SaigaManager>(); // Mono — local LLM (Ollama/Saiga)
 
             IoCManager.Register<TTSManager>(); // Corvax-TTS
             IoCManager.Register<JoinQueueManager>(); // Forge-Change

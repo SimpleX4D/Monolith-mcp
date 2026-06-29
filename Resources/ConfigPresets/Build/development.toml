@@ -38,3 +38,17 @@ see_own_notes = true
 
 [mono]
 company_whitelist = false
+
+[saiga]
+enabled = true
+api_url = "http://127.0.0.1:1234"
+api_format = "openai"
+api_key = "sk-lm-7ditUxo3:hgnekkXTRqCCYJ4dkxQU"
+model = "local-model"
+timeout = 60
+temperature = 0.4
+max_tokens = 256
+
+[saiga.mcp]
+enabled = true
+token = "devsecret"

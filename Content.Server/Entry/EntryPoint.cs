@@ -3,6 +3,7 @@ using Content.Server._Forge.JoinQueue;
 using Content.Server._Forge.Sponsor;
 using Content.Server._Forge.TTS; // Forge-Change
 using Content.Server._Mono.Company;
+using Content.Server._Mono.Saiga; // Mono — local LLM (Ollama/Saiga)
 using Content.Server._NF.Auth;
 using Content.Server.Corvax.GuideGenerator;
 using System.IO;
@@ -130,6 +131,7 @@ namespace Content.Server.Entry
                 IoCManager.Resolve<JoinQueueManager>().Initialize(); // Forge-Change
                 IoCManager.Resolve<DiscordAuthManager>().Initialize(); // Forge-Change
                 IoCManager.Resolve<TTSManager>().Initialize(); // Corvax-TTS
+                IoCManager.Resolve<SaigaManager>().Initialize(); // Mono — local LLM (Ollama/Saiga)
             }
         }
 
